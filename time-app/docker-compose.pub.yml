@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  frontend:
+    image: 90evdokimenko/time-app-frontend-dev
+    restart: on-failure
+    ports:
+      - "3000:3000"
+
+  api:
+    image: 90evdokimenko/time-app-api-dev
+    restart: on-failure
+    ports:
+      - "5555:5000"
+    
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PORT: '3306'
+      MYSQL_PASSWORD: password
+      MYSQL_DB: time_db
+      
+    depends_on:
+      - mysql
+  mysql:
+    image: mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: time_db
+    volumes:
+      - mysql_data_pub:/var/lib/mysql  
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - "8888:8080"
+
+volumes:  
+  mysql_data_pub:
